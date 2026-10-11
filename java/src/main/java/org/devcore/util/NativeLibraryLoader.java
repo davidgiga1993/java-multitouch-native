@@ -10,7 +10,7 @@ import java.io.InputStream;
  */
 public class NativeLibraryLoader
 {
-	private static boolean is64Bit = System.getProperty("os.arch").equals("amd64")
+	private static final boolean is64Bit = System.getProperty("os.arch").equals("amd64")
 			|| System.getProperty("os.arch").equals("x86_64");
 
 	/**
@@ -29,6 +29,16 @@ public class NativeLibraryLoader
 	public static void load(String libraryName)
 	{
 		String libFileName = getLibraryName(libraryName);
+		loadRaw(libFileName);
+	}
+
+	/**
+	 * Loads a native library with the given name from the current jar file
+	 *
+	 * @param libFileName Name of the library file
+	 */
+	public static void loadRaw(String libFileName)
+	{
 		try
 		{
 			System.load(extractFile(libFileName, libFileName).getAbsolutePath());
