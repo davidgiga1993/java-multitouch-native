@@ -1,6 +1,3 @@
-# Builds the Linux/X11 multitouch native library (libMtLinux64.so).
-# Keeping the build inside a container means the .so is always linked against a
-# known glibc/libX11/libXi ABI instead of whatever happens to be on the host.
 FROM ubuntu:22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8,8 +5,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		build-essential \
 		cmake \
+		pkg-config \
 		libx11-dev \
 		libxi-dev \
+		libwayland-dev \
 		openjdk-25-jdk \
 	&& rm -rf /var/lib/apt/lists/*
 

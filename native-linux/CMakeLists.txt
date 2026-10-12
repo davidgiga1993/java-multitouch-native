@@ -11,19 +11,25 @@ endif()
 
 find_package(JNI REQUIRED COMPONENTS JVM)
 find_package(X11 REQUIRED)
+find_package(PkgConfig REQUIRED)
 
 if(NOT X11_Xi_FOUND)
 	message(FATAL_ERROR "XInput2 (libXi) development headers were not found")
 endif()
 
+pkg_check_modules(WAYLAND REQUIRED wayland-client)
+
 add_library(MtLinux64 SHARED
 	LinuxMultitouch.cpp
 	WindowManager.cpp
 	MtWindow.cpp
+	WaylandMultitouch.cpp
+	SeatManager.cpp
+	MtSurface.cpp
 )
 
-target_include_directories(MtLinux64 PRIVATE ${JNI_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
-target_link_libraries(MtLinux64 PRIVATE ${X11_LIBRARIES} ${X11_Xi_LIB} pthread)
+target_include_directories(MtLinux64 PRIVATE ${JNI_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${WAYLAND_INCLUDE_DIRS})
+target_link_libraries(MtLinux64 PRIVATE ${X11_LIBRARIES} ${X11_Xi_LIB} ${WAYLAND_LIBRARIES} pthread)
 
 set_target_properties(MtLinux64 PROPERTIES
 	PREFIX "lib"
