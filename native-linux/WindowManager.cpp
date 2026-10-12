@@ -195,7 +195,6 @@ void WindowManager::eventLoop()
 		int touchId = deviceEvent->detail;
 		double x = deviceEvent->event_x;
 		double y = deviceEvent->event_y;
-		printf("TOUCH %i", touchId);
 		XFreeEventData(this->display, &event.xcookie);
 
 		MtWindow *mtWindow = this->findWindow(targetWindow);
