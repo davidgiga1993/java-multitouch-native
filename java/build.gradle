@@ -3,25 +3,71 @@ plugins {
 	id 'maven-publish'
 }
 
-sourceCompatibility = 1.8
-
 repositories {
 	mavenCentral()
 }
 
-jar {
-	from {
-		"../native/x64/Debug/WinMultitouch64.dll"
-		"../native/Debug/WinMultitouch.dll"
-	}
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 processResources {
-	from('../native/x64/Release/WinMultitouch64.dll') {
+	from('../native-win/x64/Release/WinMultitouch64.dll') {
 		into ''
 	}
-	from('../native/Release/WinMultitouch.dll') {
+	from('../native-linux/build/libMtLinux64.so') {
 		into ''
+	}
+}
+
+tasks.register('buildLinuxNative', Exec) {
+	group = 'build'
+	description = 'Builds the Linux/X11 native library using Docker'
+	workingDir = file('../native-linux')
+
+	def args = ['bash', 'build.sh', 'build']
+	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+		args.add(0, "wsl")
+	}
+	commandLine args
+}
+
+def resolveMsBuild() {
+	def programFilesX86 = System.getenv('ProgramFiles(x86)') ?: 'C:/Program Files (x86)'
+	def vswhere = file("${programFilesX86}/Microsoft Visual Studio/Installer/vswhere.exe")
+	if (vswhere.exists()) {
+		def process = [vswhere.path, '-latest', '-prerelease', '-requires', 'Microsoft.Component.MSBuild',
+					   '-find', 'MSBuild\\**\\Bin\\MSBuild.exe'].execute()
+		def output = process.text.trim()
+		process.waitFor()
+		if (output) {
+			return output.readLines().first()
+		}
+	}
+	def sources = [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\msbuild.exe",
+			"D:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\msbuild.exe"
+	]
+	for (def source : sources){
+		if(file(source).exists()){
+			return source
+		}
+	}
+
+	// Fall back to PATH (when run from a "Developer Command Prompt for VS")
+	return 'msbuild'
+}
+
+tasks.register('buildWindowsNative', Exec) {
+	group = 'build'
+	description = 'Builds the Windows native library using MSBuild'
+	workingDir = file('../native-win')
+	def jdk = System.getProperty("java.home")
+	doFirst {
+		def msbuild = resolveMsBuild()
+		commandLine 'cmd', '/c',
+				"\"${msbuild}\" win-multitouch-native.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:JDK=" + jdk
 	}
 }
 
@@ -29,16 +75,9 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			groupId = 'org.devcore'
-			artifactId = 'win-multitouch'
-			version = '1.1'
+			artifactId = 'java-multitouch-native'
+			version = '1.0'
 			from components.java
 		}
-	}
-}
-
-processResources {
-	from {
-		"../native/x64/Debug/WinMultitouch64.dll"
-		"../native/Debug/WinMultitouch.dll"
 	}
 }

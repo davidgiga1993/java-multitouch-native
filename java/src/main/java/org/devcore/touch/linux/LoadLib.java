@@ -1,9 +1,9 @@
-package org.devcore.win;
+package org.devcore.touch.linux;
 
 public class LoadLib
 {
 	public static void main(String[] args)
 	{
-		new Multitouch();
+		new X11Multitouch();
 	}
 }

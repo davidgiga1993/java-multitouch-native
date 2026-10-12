@@ -7,7 +7,7 @@ using namespace std;
 
 WindowManager windowManager = WindowManager();
 
-JNIEXPORT jint JNICALL Java_org_devcore_win_Multitouch_initTouch(JNIEnv *env, jobject object, jlong hwndLong)
+JNIEXPORT jint JNICALL Java_org_devcore_touch_win_WinMultitouch_initTouch(JNIEnv *env, jobject object, jlong hwndLong)
 {
 	try
 	{
@@ -19,7 +19,7 @@ JNIEXPORT jint JNICALL Java_org_devcore_win_Multitouch_initTouch(JNIEnv *env, jo
 	return 0;
 }
 
-JNIEXPORT void JNICALL Java_org_devcore_win_Multitouch_dispose(JNIEnv *, jobject object, jlong hwndLong)
+JNIEXPORT void JNICALL Java_org_devcore_touch_win_WinMultitouch_dispose(JNIEnv *, jobject object, jlong hwndLong)
 {
 	windowManager.removeWindow((HWND)hwndLong);
 }

@@ -1,4 +1,4 @@
-package org.devcore.util;
+package org.devcore.touch.util;
 
 import java.io.DataInputStream;
 import java.io.IOException;

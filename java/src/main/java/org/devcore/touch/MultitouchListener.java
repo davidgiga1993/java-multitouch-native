@@ -1,17 +1,17 @@
-package org.devcore.win;
+package org.devcore.touch;
 
 /**
- * Listens for multitouch events
+ * Listener for multitouch events
  */
-public interface MultitouchProcessor
+public interface MultitouchListener
 {
 
 	/**
-	 * Gets called on a click / touch event
+	 * Gets called on a touch event
 	 *
 	 * @param x       X pos
 	 * @param y       Y pos
-	 * @param pointer Pointer id
+	 * @param pointer Touch id
 	 * @param mode    Touch mode
 	 * @param button  Button id
 	 */

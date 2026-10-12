@@ -1,6 +1,8 @@
-package org.devcore.win;
+package org.devcore.touch.win;
 
-import org.devcore.util.NativeLibraryLoader;
+import org.devcore.touch.Multitouch;
+import org.devcore.touch.MultitouchListener;
+import org.devcore.touch.util.NativeLibraryLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,34 +13,21 @@ import java.util.Map;
  * Handles multitouch events for one or more windows.
  * The coordinates used are always relative to the client area of the window
  */
-public class Multitouch
+public class WinMultitouch implements Multitouch
 {
-	public static final int POINTER_DOWN = 0;
-	public static final int POINTER_UP = 1;
-	public static final int POINTER_MOVE = 2;
-
-
-	public static final int BUTTON_1 = 0;
-	public static final int BUTTON_2 = 1;
-	public static final int BUTTON_3 = 2;
-	public static final int BUTTON_4 = 3;
-	public static final int BUTTON_5 = 4;
-
 	private final List<Long> activeHwnd = new ArrayList<>();
-	private final Map<Long, MultitouchProcessor> callbacks = new HashMap<>();
+	private final Map<Long, MultitouchListener> callbacks = new HashMap<>();
 
-	private native int initTouch(long hwnd);
+	private native int initTouch(long hwnFd);
 
 	private native void dispose(long hwnd);
 
-	public Multitouch()
+	public WinMultitouch()
 	{
 		NativeLibraryLoader.load("WinMultitouch");
 	}
 
-	/**
-	 * Frees any allocated native memory and removes the listeners
-	 */
+	@Override
 	public void dispose()
 	{
 		for (long hwnd : activeHwnd)
@@ -48,24 +37,15 @@ public class Multitouch
 		activeHwnd.clear();
 	}
 
-	/**
-	 * Removes the listener for the window with the given hwnd
-	 *
-	 * @param hwnd Window handle
-	 */
+	@Override
 	public void removeWindow(long hwnd)
 	{
 		dispose(hwnd);
 		activeHwnd.remove(hwnd);
 	}
 
-	/**
-	 * Adds a listener to the window with the given handle
-	 *
-	 * @param hwnd      Window handle
-	 * @param processor Touch processor
-	 */
-	public void addWindow(long hwnd, MultitouchProcessor processor)
+	@Override
+	public void addWindow(long hwnd, MultitouchListener listener)
 	{
 		if (!Thread.currentThread().getName().equals("main"))
 		{
@@ -78,7 +58,7 @@ public class Multitouch
 		}
 
 		activeHwnd.add(hwnd);
-		callbacks.put(hwnd, processor);
+		callbacks.put(hwnd, listener);
 	}
 
 
@@ -95,7 +75,7 @@ public class Multitouch
 	@SuppressWarnings("unused")
 	protected void nativeOnTouchCallback(long hwnd, int x, int y, int pointer, int mode, int button)
 	{
-		MultitouchProcessor processor = callbacks.get(hwnd);
+		MultitouchListener processor = callbacks.get(hwnd);
 		if (processor != null)
 		{
 			processor.onTouch(x, y, pointer, mode, button);

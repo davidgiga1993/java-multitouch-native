@@ -3,6 +3,9 @@
 *.idea
 .vs/
 x64/Debug
+x64/Release
 Debug/
+Release/
 build/
-/native/Release/*
+/native-*/Release/*
+/java/out
