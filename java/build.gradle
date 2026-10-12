@@ -17,10 +17,10 @@ jar {
 }
 
 processResources {
-	from('../native/x64/Debug/WinMultitouch64.dll') {
+	from('../native/x64/Release/WinMultitouch64.dll') {
 		into ''
 	}
-	from('../native/Debug/WinMultitouch.dll') {
+	from('../native/Release/WinMultitouch.dll') {
 		into ''
 	}
 }
@@ -30,7 +30,7 @@ publishing {
 		mavenJava(MavenPublication) {
 			groupId = 'org.devcore'
 			artifactId = 'win-multitouch'
-			version = '1.0'
+			version = '1.1'
 			from components.java
 		}
 	}

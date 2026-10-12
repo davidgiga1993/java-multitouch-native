@@ -31,7 +31,7 @@ public class Multitouch
 
 	private native void dispose(long hwnd);
 
-	static
+	public Multitouch()
 	{
 		NativeLibraryLoader.load("WinMultitouch");
 	}

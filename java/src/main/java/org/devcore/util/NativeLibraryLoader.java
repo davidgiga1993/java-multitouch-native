@@ -31,8 +31,7 @@ public class NativeLibraryLoader
 		String libFileName = getLibraryName(libraryName);
 		try
 		{
-			File file = new File(System.getProperty("java.io.tmpdir"), libFileName);
-			System.load(extractFile(libFileName, file).getAbsolutePath());
+			System.load(extractFile(libFileName, libFileName).getAbsolutePath());
 		}
 		catch (Throwable ex)
 		{
@@ -60,21 +59,37 @@ public class NativeLibraryLoader
 	 * Extracts the given source path from the jar to the destination.
 	 * If the destination does already exist it will be directly returned
 	 *
-	 * @param sourcePath    Source
-	 * @param extractedFile Destination
+	 * @param sourcePath  Source
+	 * @param libFileName Name of the library
 	 * @return Extracted file
 	 * @throws IOException General IO error
 	 */
-	private static File extractFile(String sourcePath, File extractedFile) throws IOException
+	private static File extractFile(String sourcePath, String libFileName) throws IOException
 	{
-		if (extractedFile.exists() && !extractedFile.delete())
+		File file;
+
+		// Get the md5 of the lib
+		try (InputStream input = readFile(sourcePath))
 		{
-			throw new RuntimeException("Could not extract file");
+			String hexStr = "";
+			byte[] md5 = Hash.md5(input);
+			if (md5 != null)
+			{
+				hexStr = Hash.bytesToHex(md5, 5);
+			}
+			file = new File(System.getProperty("java.io.tmpdir"), hexStr + "_" + libFileName);
 		}
+
+		if (file.exists())
+		{
+			// Do nothing
+			return file;
+		}
+
 
 		try (InputStream input = readFile(sourcePath))
 		{
-			try (FileOutputStream output = new FileOutputStream(extractedFile))
+			try (FileOutputStream output = new FileOutputStream(file))
 			{
 				byte[] buffer = new byte[4096];
 				while (true)
@@ -90,10 +105,10 @@ public class NativeLibraryLoader
 			}
 			catch (IOException ex)
 			{
-				throw new RuntimeException("Error extracting file: " + sourcePath + " to " + extractedFile.getAbsolutePath(), ex);
+				throw new RuntimeException("Error extracting file: " + sourcePath + " to " + file.getAbsolutePath(), ex);
 			}
 		}
 
-		return extractedFile;
+		return file;
 	}
 }
